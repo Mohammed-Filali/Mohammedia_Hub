@@ -12,7 +12,14 @@ class CreateReclamationsTable extends Migration
             $table->id();
             $table->string('description');
             $table->string('category');
-            $table->string('file_path')->nullable(); // chemin du fichier
+            $table->string('name');
+            $table->string('adress');
+            $table->string('CIN');
+            $table->string('telephone');
+            $table->integer('age');
+            $table->boolean('isAccept')->default(0);
+            $table->string('email');
+            $table->string('file_path')->nullable();
             $table->timestamps();
         });
     }

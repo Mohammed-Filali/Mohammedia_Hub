@@ -12,6 +12,13 @@ class Reclamation extends Model
     protected $fillable = [
         'description',
         'category',
+        'name',
+        'adress',
+        'CIN',
+        'telephone',
+        'age',
+        'email',
+        'isAccept',
         'file_path',
     ];
 

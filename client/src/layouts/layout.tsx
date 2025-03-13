@@ -2,11 +2,12 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { setUser } from '../redux/store';
+import { RootState, setUser } from '../redux/store';
 import { UserApi } from '../service/UserApi';
+import bg from '../images/logo-com.png'
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useSelector(state => state);
+  const user = useSelector((state: RootState) => state.user);
   const token = localStorage.getItem('token');
   const dispatch = useDispatch();
 
@@ -32,9 +33,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   };
   
   return (
-    <div className="h-screen w-full bg-gray-100 flex flex-col">
+    <div className="h-screen w-full  flex flex-col">
       <header className="bg-custom-yellow w-full p-4 text-white flex flex-col md:flex-row md:justify-between items-center">
-        <div className="flex justify-between items-center w-full">
+        <div className="flex  items-center w-full">
+        <img className="justify-center" width={'100px'} src={bg} alt="" />
+
           <h1 className="text-3xl font-bold">Mohammedia Hub</h1>
         </div>
 
@@ -44,7 +47,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <Link to="/" className="text-white hover:text-custom-green">Accueil</Link>
             </li>
             <li>
-              <Link to="/reclamation" className="text-white hover:text-custom-green">Soumettre une réclamation</Link>
+              <Link to="/reclamation" className="text-white hover:text-custom-green">réclamer</Link>
             </li>
 
             {/* Conditionally render links based on user state */}

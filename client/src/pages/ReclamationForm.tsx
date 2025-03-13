@@ -1,123 +1,227 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { number, z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import Layout from '../layouts/layout';
 import { UserApi } from '../service/UserApi';
-import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, setUser } from '../redux/store';
 
 const reclamationSchema = z.object({
   description: z.string().min(10, 'La description est obligatoire et doit comporter au moins 10 caractères'),
   category: z.string().min(1, 'Veuillez choisir une catégorie'),
-  // Le champ "file" est désormais validé dans onSubmit
+  name: z.string(),
+  email: z.string(),
+  adress: z.string(),
+  telephone: z.string(),
+  CIN: z.string(),
+  age: z.string(),
 });
 
-type ReclamationFormData = {
-  description: string;
-  category: string;
-  file: File | null;
-};
+type ReclamationFormData = z.infer<typeof reclamationSchema>;
 
-const ReclamationForm = () => {
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<ReclamationFormData>({
-    resolver: zodResolver(reclamationSchema),
-  });
- const { user } = useSelector(state => state);
-  const Token = localStorage.getItem('token');
-  const [file, setFile] = useState<File | null>(null);
+export default function ReclamationForm() {
+  const user = useSelector((state: RootState) => state.user);
+  const token = localStorage.getItem('token');
+  const dispatch = useDispatch();
 
-  // Validation manuelle du fichier (taille, type)
-  const validateFile = (file: File | null) => {
-    if (!file) {
-      return 'Le fichier est requis';
-    }
-    if (file.size > 5 * 1024 * 1024) { // Taille max 5MB
-      return 'Le fichier ne doit pas dépasser 5 Mo';
-    }
-    if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
-      return 'Le fichier doit être une image (JPG, PNG)';
-    }
-    return true;
+  const userSetter = async () => {
+    const userData = await UserApi.getUser();
+    dispatch(setUser(userData));
   };
 
+  useEffect(() => {
+    if (token !== 'false' && !user) {
+      userSetter();
+    }
+  }, [user, token, dispatch]);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<ReclamationFormData>({
+    resolver: zodResolver(reclamationSchema),
+    defaultValues: {
+      age: user?.age ?? 0, // Default value as a number
+    },
+  });
+
+  console.log('Form errors:', errors); // Log form errors
+  console.log('User:', user); // Log user object
+
+  const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error , setError]= useState('')
+  const validateFile = (file: File | null): string | true => {
+    if (file) {// File is required
+    if (file.size > 5 * 1024 * 1024) return 'Le fichier ne doit pas dépasser 5 Mo'; // File size must be <= 5MB
+    if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) return 'Le fichier doit être une image (JPG, PNG)'; // File type must be JPG or PNG
+    return true; // File is valid}
+  }};
+
   const onSubmit = async (data: ReclamationFormData) => {
-    // Valider le fichier
-    const fileError = validateFile(file);
-    if (fileError !== true) {
-      alert(fileError); // Afficher l'erreur
+    console.log('Form submitted!'); // Debugging log
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const fileValidation = validateFile(file);
+    if ( file && fileValidation !== true) {
+      console.error('File validation error:', fileValidation); // Debugging log
+      setFileError(fileValidation);
+      setIsSubmitting(false);
       return;
     }
 
     try {
-      // FormData pour envoyer le fichier et les autres données
       const formData = new FormData();
       formData.append('description', data.description);
       formData.append('category', data.category);
-      if (file) {
-        formData.append('file', file);
-      }
+      formData.append('name', user?.name ?? data.name);
+      formData.append('email', user?.email ?? data.email);
 
-      await UserApi.createReclamation(formData); // Appel API pour soumettre la réclamation
-    } catch (error) {
-      console.error('Erreur lors de la soumission de la réclamation:', error);
+      formData.append('adress', user?.adress ??data.adress);
+      formData.append('telephone', user?.telephone ??data.telephone);
+      formData.append('CIN', user?.CIN ?? data.CIN);
+      formData.append('age', Number(data.age)); // Ensure age is passed as a number
+      if (file) {formData.append('file', file)};
+
+      console.log('FormData:', formData); // Debugging log
+
+      const response = await UserApi.createReclamation(formData);
+      // try {
+      //   await UserApi.AddNotifications({
+      //     "user_id": 1,
+      //     "message": "une nouvelle reclamation"
+      //   })
+      // } catch (error) {
+      //   console.log('notifications',error);
+        
+      // }
+      
+      console.log('API response:', response); // Debugging log
+      
+      alert('Réclamation soumise avec succès !');
+      reset();
+      setFile(null);
+      setFileError(null);
+      setError()
+    } catch ({response}) {
+      setError( response.data.message); // Debugging log
+
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <Layout>
-      <div className="max-w-lg mx-auto p-6 mt-6 bg-white rounded-lg shadow-md">
+      <div className="max-w-xl mx-auto p-6 mt-6 rounded-lg shadow-md">
         <h1 className="text-3xl text-custom-green font-bold text-center">Soumettre une réclamation</h1>
+        {error? <p className=' text-center text-xl text-red-600' > {error} </p>:""}
         <form onSubmit={handleSubmit(onSubmit)} className="mt-8" encType="multipart/form-data">
+                    <div className="mb-4">
+  <label className="block text-sm font-medium">NAME</label>
+  <input
+    type="text"
+    {...register('name')}
+    defaultValue={user?.name || ''}
+    className="w-full p-2 border border-gray-300 rounded-lg"
+  />
+</div>
+<div className="mb-4">
+  <label className="block text-sm font-medium">E-mail</label>
+  <input
+    type="text"
+    {...register('email')}
+    defaultValue={user?.email || ''}
+    className="w-full p-2 border border-gray-300 rounded-lg"
+  />
+</div>
+<div className="mb-4">
+  <label className="block text-sm font-medium">ADDRESS</label>
+  <input
+    type="text"
+    {...register('adress')}
+    defaultValue={user?.adress || ''}
+    className="w-full p-2 border border-gray-300 rounded-lg"
+  />
+</div>
+<div className="mb-4">
+  <label className="block text-sm font-medium">CIN</label>
+  <input
+    type="text"
+    {...register('CIN')}
+    defaultValue={user?.CIN || ''}
+    className="w-full p-2 border border-gray-300 rounded-lg"
+  />
+</div>
+<div className="mb-4">
+  <label className="block text-sm font-medium">TELEPHONE</label>
+  <input
+    type="text"
+    {...register('telephone')}
+    defaultValue={user?.telephone || ''}
+    className="w-full p-2 border border-gray-300 rounded-lg"
+  />
+</div>
+<div className="mb-4">
+  <label className="block text-sm font-medium">AGE</label>
+  <input
+    type="number"
+    {...register('age')}
+    defaultValue={Number(user?.age)|| 0}
+    className="w-full p-2 border border-gray-300 rounded-lg"
+  />
+</div>
+
+
+          {/* Category Selection */}
           <div className="mb-4">
-            <label htmlFor="category" className="block text-sm text-custom-green font-medium">Catégorie</label>
-            <select
-              id="category"
-              {...register('category')}
-              className="w-full p-2 border border-gray-300 rounded-lg mt-2"
-            >
+            <label className="block text-sm text-custom-green font-medium">Catégorie</label>
+            <select {...register('category')} className="w-full p-2 border border-gray-300 rounded-lg">
               <option value="">Sélectionner une catégorie</option>
               <option value="voirie">Voirie</option>
               <option value="eclairage">Éclairage</option>
               <option value="proprete">Propreté</option>
             </select>
-            {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category.message}</p>}
+            {errors.category && <p className="text-red-500 text-xs">{errors.category.message}</p>}
           </div>
 
+          {/* Description Input */}
           <div className="mb-4">
-            <label htmlFor="description" className="block text-custom-green text-sm font-medium">Description</label>
-            <textarea
-              id="description"
-              {...register('description')}
-              rows={4}
-              className="w-full p-2 border border-gray-300 rounded-lg mt-2"
-            ></textarea>
-            {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
+            <label className="block text-custom-green text-sm font-medium">Description</label>
+            <textarea {...register('description')} rows={4} className="w-full p-2 border border-gray-300 rounded-lg"></textarea>
+            {errors.description && <p className="text-red-500 text-xs">{errors.description.message}</p>}
           </div>
 
+          {/* File Upload */}
           <div className="mb-4">
-            <label htmlFor="file" className="block text-custom-green text-sm font-medium">Télécharger une photo</label>
+            <label className="block text-custom-green text-sm font-medium">Télécharger une photo</label>
             <input
               type="file"
-              id="file"
-              {...register('file')}
               onChange={(e) => {
-                const selectedFile = e.target.files ? e.target.files[0] : null;
-                setFile(selectedFile);
-                setValue('file', selectedFile); // Mettre à jour la valeur du formulaire
+                setFile(e.target.files?.[0] || null);
+                setFileError(null); // Clear file error when a new file is selected
               }}
-              className="w-full p-2 border border-gray-300 rounded-lg mt-2"
+              className="w-full p-2 border border-gray-300 rounded-lg"
             />
-            {errors.file && <p className="text-red-500 text-xs mt-1">{errors.file.message}</p>}
+            {fileError && <p className="text-red-500 text-xs">{fileError}</p>}
           </div>
 
-          { user && Token !== 'false' ? <button type="submit" className="w-full bg-custom-green text-white px-6 py-3 rounded-lg mt-4">
-            Soumettre
-          </button>: <div className='w-full text-center'> connecter pour autorisez <Link to={'/login'}>Click</Link> </div> }
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full bg-custom-green text-white px-6 py-3 rounded-lg flex items-center justify-center"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? <Loader2 className="animate-spin mr-2" size={20} /> : "Soumettre"}
+          </button>
         </form>
       </div>
     </Layout>
   );
-};
-
-export default ReclamationForm;
+}

@@ -1,10 +1,10 @@
-import { createStore } from 'redux';
+import { createStore } from "redux";
 
 const initialState = {
-  user: null, 
+  user: null,
 };
 
-const SET_USER = 'SET_USER';
+const SET_USER = "SET_USER";
 
 export const setUser = (user: any) => ({
   type: SET_USER,
@@ -25,4 +25,5 @@ const reducer = (state = initialState, action: any) => {
 
 const store = createStore(reducer);
 
+export type RootState = ReturnType<typeof store.getState>; // ✅ Add this
 export default store;

@@ -1,20 +1,20 @@
-// src/pages/Home.tsx
-import React from "react";
 import Layout from "../layouts/layout";
 import "../styles/animations.css";
 import { Link } from "react-router-dom";
-
+import bg from '../images/logo-com.png'
 const Home = () => {
   return (
     <Layout>
-      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
-        {/* Background Container */}
-        <div className="absolute inset-0 bg-cover bg-center bg-animation blur-sm"></div>
-
-        {/* Content */}
+      <div className="relative min-h-screen items-center justify-center  ">
+        <div className=" w-full flex justify-center items-center text-center">     
+             <img className="justify-center" width={'100px'} src={bg} alt="" />
+        </div>
+        <div className="bg-cover bg-center mt-1 bg-animation rounded"></div>
         <section className="relative text-center z-10 text-white flex flex-col items-center justify-center">
-          <h2 className="text-3xl font-bold">Bienvenue sur Mohammedia Hub</h2>
-          <p className="mt-4 max-w-xl text-center">
+
+        
+
+          <p className="mt-4 text-custom-yellow max-w-xl text-center">
             "Mohammedia Hub" est une plateforme citoyenne conçue pour faciliter la communication entre les habitants et la commune. 
             Signalez des problèmes urbains, suivez l'actualité communale et participez activement aux décisions municipales.
           </p>

@@ -1,9 +1,10 @@
 // src/pages/Login.tsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { UserApi } from '../service/UserApi';
-import { setUser } from '../redux/store';
+import {  setUser } from '../redux/store';
 import { useDispatch } from 'react-redux';
+import bg from '../images/logo-com.png'
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -45,8 +46,15 @@ const Login = () => {
       const res = await UserApi.login({ email, password });
     localStorage.setItem('token', res.data.token);
     dispatch(setUser(await UserApi.getUser()));
+      if(res.data.user.isAdmin){
+        navigate('/dashboard');
 
-      navigate('/');
+      }else if(res.data.user.isActive){
+        navigate('/');
+
+      }else if(!res.data.user.isActive){
+          alert('ce compte est desactivé')
+      }
     } catch (error) {
       newErrors.faild = error.response.data.message;
 
@@ -58,6 +66,10 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
       <form onSubmit={handleLogin} className="w-full max-w-sm mt-8 bg-white text-center p-6 rounded-lg shadow-md">
+          <div className="w-full flex justify-center">
+              <img src={bg} width={'100px'} alt="" />
+
+          </div>
         <h1 className="text-3xl text-custom-green font-bold">Se connecter</h1>
         {errors.faild && <p className="text-red-500 text-lg">{errors.faild}</p>}
 
@@ -87,6 +99,7 @@ const Login = () => {
           />
           {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
         </div>
+        <Link to={'/register'}> creé un nevau compt</Link>
 
         <button type="submit" className="w-full bg-custom-green text-white px-6 py-3 rounded-lg mt-4">
           Se connecter

@@ -16,11 +16,20 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
+            'adress'=> 'required|string|max:255',
+            'CIN'=> 'required|string|max:10',
+            'telephone'=> 'required|string|max:10',
+            'age' => 'required|integer|max:255',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'adress'=> $request->adress,
+            'CIN'=> $request->CIN,
+            'telephone'=> $request->telephone,
+            'age'=> $request->age,
+
             'password' => bcrypt($request->password),
         ]);
 
@@ -43,12 +52,17 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
+            if(!$user->isActive){
+                return response()->json(['message' => 'ce compte est desactivé'], 401);
+
+            }
             return response()->json([
                 'message' => 'Login successful',
                 'status'=>true,
                 'token' => $user->createToken('YourAppName')->plainTextToken,
                 'user' => $user
             ]);
+
         }
 
         \Log::warning('Unauthorized login attempt', ['credentials' => $credentials]);
@@ -71,4 +85,26 @@ class AuthController extends Controller
     {
         return response()->json($request->user());
     }
+
+    public function users()
+    {
+        $users= User::all();
+        return response()->json(['data'=>$users]);
+    }
+
+    public function updateUserStatus (Request $request , $id){
+        $request->validate(
+            ['isActive'=>'required']
+        );
+        \Log::warning('Unauthorized login attempt', ['credentials' => $request->isActive]);
+
+        $user = User::find($id);
+        $user->update([
+            'isActive' => $request->isActive,
+
+        ]);
+        return response()->json(['data'=>$user]);
+
+    }
+
 }
