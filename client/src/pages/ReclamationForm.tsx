@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { number, z } from 'zod';
+import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import Layout from '../layouts/layout';
@@ -45,32 +45,30 @@ export default function ReclamationForm() {
   } = useForm<ReclamationFormData>({
     resolver: zodResolver(reclamationSchema),
     defaultValues: {
-      age: user?.age ?? 0, // Default value as a number
+      age: user?.age ?? 0,
     },
   });
-
-  console.log('Form errors:', errors); // Log form errors
-  console.log('User:', user); // Log user object
 
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error , setError]= useState('')
+  const [error, setError] = useState('');
+
   const validateFile = (file: File | null): string | true => {
-    if (file) {// File is required
-    if (file.size > 5 * 1024 * 1024) return 'Le fichier ne doit pas dépasser 5 Mo'; // File size must be <= 5MB
-    if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) return 'Le fichier doit être une image (JPG, PNG)'; // File type must be JPG or PNG
-    return true; // File is valid}
-  }};
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) return 'Le fichier ne doit pas dépasser 5 Mo';
+      if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) return 'Le fichier doit être une image (JPG, PNG)';
+      return true;
+    }
+    return 'Un fichier est requis';
+  };
 
   const onSubmit = async (data: ReclamationFormData) => {
-    console.log('Form submitted!'); // Debugging log
     if (isSubmitting) return;
     setIsSubmitting(true);
 
     const fileValidation = validateFile(file);
-    if ( file && fileValidation !== true) {
-      console.error('File validation error:', fileValidation); // Debugging log
+    if (file && fileValidation !== true) {
       setFileError(fileValidation);
       setIsSubmitting(false);
       return;
@@ -82,36 +80,20 @@ export default function ReclamationForm() {
       formData.append('category', data.category);
       formData.append('name', user?.name ?? data.name);
       formData.append('email', user?.email ?? data.email);
-
-      formData.append('adress', user?.adress ??data.adress);
-      formData.append('telephone', user?.telephone ??data.telephone);
+      formData.append('adress', user?.adress ?? data.adress);
+      formData.append('telephone', user?.telephone ?? data.telephone);
       formData.append('CIN', user?.CIN ?? data.CIN);
-      formData.append('age', Number(data.age)); // Ensure age is passed as a number
-      if (file) {formData.append('file', file)};
-
-      console.log('FormData:', formData); // Debugging log
+      formData.append('age', Number(data.age).toString());
+      if (file) formData.append('file', file);
 
       const response = await UserApi.createReclamation(formData);
-      // try {
-      //   await UserApi.AddNotifications({
-      //     "user_id": 1,
-      //     "message": "une nouvelle reclamation"
-      //   })
-      // } catch (error) {
-      //   console.log('notifications',error);
-        
-      // }
-      
-      console.log('API response:', response); // Debugging log
-      
       alert('Réclamation soumise avec succès !');
       reset();
       setFile(null);
       setFileError(null);
-      setError()
-    } catch ({response}) {
-      setError( response.data.message); // Debugging log
-
+      setError('');
+    } catch ({ response }) {
+      setError(response?.data?.message || 'Une erreur est survenue');
     } finally {
       setIsSubmitting(false);
     }
@@ -119,106 +101,110 @@ export default function ReclamationForm() {
 
   return (
     <Layout>
-      <div className="max-w-xl mx-auto p-6 mt-6 rounded-lg shadow-md">
-        <h1 className="text-3xl text-custom-green font-bold text-center">Soumettre une réclamation</h1>
-        {error? <p className=' text-center text-xl text-red-600' > {error} </p>:""}
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-8" encType="multipart/form-data">
-                    <div className="mb-4">
-  <label className="block text-sm font-medium">NAME</label>
-  <input
-    type="text"
-    {...register('name')}
-    defaultValue={user?.name || ''}
-    className="w-full p-2 border border-gray-300 rounded-lg"
-  />
-</div>
-<div className="mb-4">
-  <label className="block text-sm font-medium">E-mail</label>
-  <input
-    type="text"
-    {...register('email')}
-    defaultValue={user?.email || ''}
-    className="w-full p-2 border border-gray-300 rounded-lg"
-  />
-</div>
-<div className="mb-4">
-  <label className="block text-sm font-medium">ADDRESS</label>
-  <input
-    type="text"
-    {...register('adress')}
-    defaultValue={user?.adress || ''}
-    className="w-full p-2 border border-gray-300 rounded-lg"
-  />
-</div>
-<div className="mb-4">
-  <label className="block text-sm font-medium">CIN</label>
-  <input
-    type="text"
-    {...register('CIN')}
-    defaultValue={user?.CIN || ''}
-    className="w-full p-2 border border-gray-300 rounded-lg"
-  />
-</div>
-<div className="mb-4">
-  <label className="block text-sm font-medium">TELEPHONE</label>
-  <input
-    type="text"
-    {...register('telephone')}
-    defaultValue={user?.telephone || ''}
-    className="w-full p-2 border border-gray-300 rounded-lg"
-  />
-</div>
-<div className="mb-4">
-  <label className="block text-sm font-medium">AGE</label>
-  <input
-    type="number"
-    {...register('age')}
-    defaultValue={Number(user?.age)|| 0}
-    className="w-full p-2 border border-gray-300 rounded-lg"
-  />
-</div>
+      <div className="max-w-4xl mx-auto p-6 mt-6 bg-white rounded-lg shadow-md">
+        <h1 className="text-3xl text-custom-green font-bold text-center mb-6">Soumettre une réclamation</h1>
+        {error && <p className="text-center text-xl text-red-600 mb-4">{error}</p>}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" encType="multipart/form-data">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium">Nom</label>
+              <input
+                type="text"
+                {...register('name')}
+                defaultValue={user?.name || ''}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-green"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">E-mail</label>
+              <input
+                type="email"
+                {...register('email')}
+                defaultValue={user?.email || ''}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-green"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Adresse</label>
+              <input
+                type="text"
+                {...register('adress')}
+                defaultValue={user?.adress || ''}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-green"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">CIN</label>
+              <input
+                type="text"
+                {...register('CIN')}
+                defaultValue={user?.CIN || ''}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-green"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Téléphone</label>
+              <input
+                type="text"
+                {...register('telephone')}
+                defaultValue={user?.telephone || ''}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-green"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Âge</label>
+              <input
+                type="number"
+                {...register('age')}
+                defaultValue={Number(user?.age) || 0}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-green"
+              />
+            </div>
+          </div>
 
-
-          {/* Category Selection */}
-          <div className="mb-4">
-            <label className="block text-sm text-custom-green font-medium">Catégorie</label>
-            <select {...register('category')} className="w-full p-2 border border-gray-300 rounded-lg">
+          <div>
+            <label className="block text-sm font-medium">Catégorie</label>
+            <select
+              {...register('category')}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-green"
+            >
               <option value="">Sélectionner une catégorie</option>
               <option value="voirie">Voirie</option>
               <option value="eclairage">Éclairage</option>
               <option value="proprete">Propreté</option>
             </select>
-            {errors.category && <p className="text-red-500 text-xs">{errors.category.message}</p>}
+            {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category.message}</p>}
           </div>
 
-          {/* Description Input */}
-          <div className="mb-4">
-            <label className="block text-custom-green text-sm font-medium">Description</label>
-            <textarea {...register('description')} rows={4} className="w-full p-2 border border-gray-300 rounded-lg"></textarea>
-            {errors.description && <p className="text-red-500 text-xs">{errors.description.message}</p>}
+          <div>
+            <label className="block text-sm font-medium">Description</label>
+            <textarea
+              {...register('description')}
+              rows={4}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-green"
+            ></textarea>
+            {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
           </div>
 
-          {/* File Upload */}
-          <div className="mb-4">
-            <label className="block text-custom-green text-sm font-medium">Télécharger une photo</label>
+          <div>
+            <label className="block text-sm font-medium">Télécharger une photo</label>
             <input
               type="file"
               onChange={(e) => {
                 setFile(e.target.files?.[0] || null);
-                setFileError(null); // Clear file error when a new file is selected
+                setFileError(null);
               }}
-              className="w-full p-2 border border-gray-300 rounded-lg"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-green"
             />
-            {fileError && <p className="text-red-500 text-xs">{fileError}</p>}
+            {fileError && <p className="text-red-500 text-xs mt-1">{fileError}</p>}
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-custom-green text-white px-6 py-3 rounded-lg flex items-center justify-center"
+            className="w-full bg-custom-green text-white px-6 py-3 rounded-lg flex items-center justify-center hover:bg-green-700 transition"
             disabled={isSubmitting}
           >
-            {isSubmitting ? <Loader2 className="animate-spin mr-2" size={20} /> : "Soumettre"}
+            {isSubmitting ? <Loader2 className="animate-spin mr-2" size={20} /> : 'Soumettre'}
           </button>
         </form>
       </div>

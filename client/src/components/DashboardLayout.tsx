@@ -1,14 +1,24 @@
 import { Outlet } from 'react-router-dom';
 import Header from './HeaderAdmin';
 import Sidebar from './Sidebar';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, setUser } from '../redux/store';
+import { useEffect } from 'react';
+import { UserApi } from '../service/UserApi';
 
 
 const DashboardLayout = () => {
 
-
+  const dispatch=useDispatch()
   const user = useSelector((state: RootState) => state.user);
+ const userSetter = async () => {
+    const userData = await UserApi.getUser();
+    dispatch(setUser(userData));
+  };
+  useEffect(()=>{
+    if(!user){
+    userSetter()    }
+  })
   if (!user?.isAdmin) {
     return <>
         <div className='w-full flex justify-center text-center items-center '>

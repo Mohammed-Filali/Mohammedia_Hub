@@ -60,10 +60,26 @@ export const UserApi = {
     },
 
 
-    // AddNotifications: async (values) => {
-    //     const {data}=await AxiosClient.post(`/api/notifications`,values)
-    //     return  data
-    // },
+    AddPull:async (values) => {        
+        const {data}=await AxiosClient.post('/api/polls', {question:values})
+        return  data
+    },
+
+
+    getPull:async () => {        
+        const {data}=await AxiosClient.get('/api/polls')
+        return  data
+    },
+
+    AddVote:async (pollId,voteType) => {        
+        const {data}=await AxiosClient.post(`/api/polls/${pollId}/vote`, { vote: voteType })
+        return  data
+    },
+
+    getVotes:async () => {
+        const {data}=await AxiosClient.get('api/votes')
+        return  data
+    }
 }
 
 

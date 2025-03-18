@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Validator;
 
 class ReclamationController extends Controller
 {
+
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -69,15 +71,14 @@ if ($user &&!$user->isActive) {
     }
 
     public function updateReclamationState(Request $request , $id){
-        $request->validate(
-            ['isAccept'=>'required']
-        );
+        $request->validate([
+            'etat' => 'required|in:pas encours,encours,finis',
+        ]);
         $reclamation=Reclamation::find($id);
-        $reclamation->update([
-            'isAccept'=>$request->isAccept
-        ]);
-        return response()->json([
-            'data' =>$reclamation
-        ]);
+        $reclamation->update(['etat' => $request->etat]);
+
+        return response()->json(['message' => 'État mis à jour avec succès.']);
+
     }
+
 }

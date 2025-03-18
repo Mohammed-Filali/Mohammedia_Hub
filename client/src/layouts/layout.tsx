@@ -1,86 +1,149 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { RootState, setUser } from '../redux/store';
 import { UserApi } from '../service/UserApi';
-import bg from '../images/logo-com.png'
+import bg from '../images/logo-com.png';
+import { Home, AlertCircle, MessageSquare, LogIn, LogOut, UserPlus, User, Menu, X } from 'lucide-react';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const user = useSelector((state: RootState) => state.user);
   const token = localStorage.getItem('token');
   const dispatch = useDispatch();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const userSetter = async () => {
-    const userData = await UserApi.getUser();
-    dispatch(setUser(userData));
+    try {
+      const userData = await UserApi.getUser();
+      dispatch(setUser(userData));
+    } catch (error) {
+      console.error('Failed to fetch user:', error);
+    }
   };
-  
+
   useEffect(() => {
-    if (token !=='false' && !user) {
+    if (token !== 'false' && !user) {
       userSetter();
     }
-  }, [user, token, dispatch]); 
+  }, [user, token, dispatch]);
+
   const logout = async () => {
     try {
-      await UserApi.logout(); 
-      localStorage.setItem('token', 'false'); 
+      await UserApi.logout();
+      localStorage.setItem('token', 'false');
       dispatch(setUser({}));
-
     } catch (error) {
-      console.log(error);
+      console.error('Logout failed:', error);
     }
   };
-  
-  return (
-    <div className="h-screen w-full  flex flex-col">
-      <header className="bg-custom-yellow w-full p-4 text-white flex flex-col md:flex-row md:justify-between items-center">
-        <div className="flex  items-center w-full">
-        <img className="justify-center" width={'100px'} src={bg} alt="" />
 
-          <h1 className="text-3xl font-bold">Mohammedia Hub</h1>
+  const renderAuthLinks = () => {
+    if (user && token !== 'false') {
+      return (
+        <>
+          <li>
+            <button
+              onClick={logout}
+              className="text-custom-yellow hover:text-custom-green flex items-center cursor-pointer "
+              aria-label="Logout"
+            >
+              <LogOut className="mr-2" /> Logout
+            </button>
+          </li>
+          <li>
+            <span
+              className="text-custom-yellow bg-custom-green rounded-full w-10 h-10 flex items-center justify-center text-xl font-semibold shadow-md"
+              aria-label="User Profile"
+            >
+              {user.name ? user.name[0] : <User />}
+            </span>
+          </li>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <li>
+          <Link
+            to="/login"
+            className="text-custom-yellow hover:text-custom-green flex items-center "
+            aria-label="Login"
+          >
+            <LogIn className="mr-2" /> Login
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/register"
+            className="text-custom-yellow hover:text-custom-green flex items-center "
+            aria-label="Register"
+          >
+            <UserPlus className="mr-2" /> Register
+          </Link>
+        </li>
+      </>
+    );
+  };
+
+  return (
+    <div className="h-screen w-full flex flex-col">
+      <header className="bg-white w-full p-4 text-custom-yellow flex flex-col md:flex-row md:justify-between items-center shadow-md">
+        <div className="flex items-center justify-between w-full md:w-auto">
+          <div className="flex items-center">
+            <img className="mr-4 shadow-md rounded-lg" width="80px" src={bg} alt="Logo" />
+            <h1 className="text-2xl md:text-3xl font-bold">Mohammedia Hub</h1>
+          </div>
+          <button
+            className="md:hidden text-custom-yellow hover:text-custom-green "
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle Menu"
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
 
-        <nav className="mt-4 md:mt-0">
+        <nav
+          className={`${
+            isMobileMenuOpen ? 'block' : 'hidden'
+          } md:block mt-4 md:mt-0 w-full md:w-auto shadow-md md:shadow-none`}
+        >
           <ul className="flex flex-col md:flex-row md:space-x-6 space-y-4 md:space-y-0 items-center">
             <li>
-              <Link to="/" className="text-white hover:text-custom-green">Accueil</Link>
+              <Link
+                to="/"
+                className="text-custom-yellow hover:text-custom-green flex items-center "
+                aria-label="Home"
+              >
+                <Home className="mr-2" /> Home
+              </Link>
             </li>
             <li>
-              <Link to="/reclamation" className="text-white hover:text-custom-green">réclamer</Link>
+              <Link
+                to="/reclamation"
+                className="text-custom-yellow hover:text-custom-green flex items-center "
+                aria-label="Reclamation"
+              >
+                <AlertCircle className="mr-2" /> Reclamation
+              </Link>
             </li>
-
-            {/* Conditionally render links based on user state */}
-            {user && token !== 'false' ? (
-              <>
-                <li  >
-                  <a  onClick={logout} className="text-white hover:text-custom-green">Se déconnecter</a>
-                </li>
-                
-                {/* Display user's initial or name */}
-                <li>
-                  <span className="text-white bg-custom-green rounded-full w-10 h-10 flex items-center justify-center text-xl font-semibold">
-                    {user.name ? user.name[0] : 'U'}
-                  </span>
-                </li>
-              </>
-            ) : (
-              <>
-                <li>
-                  <Link to="/login" className="text-white hover:text-custom-green">Se connecter</Link>
-                </li>
-                <li>
-                  <Link to="/register" className="text-white hover:text-custom-green">Créer un compte</Link>
-                </li>
-              </>
-            )}
+            <li>
+              <Link
+                to="/polls"
+                className="text-custom-yellow hover:text-custom-green flex items-center "
+                aria-label="Polls"
+              >
+                <MessageSquare className="mr-2" /> Polls
+              </Link>
+            </li>
+            {renderAuthLinks()}
           </ul>
         </nav>
       </header>
 
-      <main className="w-full flex-1">{children}</main>
+      <main className="w-full flex-1 p-4 bg-gray-100 shadow-inner">{children}</main>
 
-      <footer className="bg-custom-yellow text-white p-4 text-center">
+      <footer className="bg-white text-custom-yellow p-4 text-center shadow-inner">
         <p>&copy; 2025 Mohammedia Commune. Tous droits réservés.</p>
       </footer>
     </div>
