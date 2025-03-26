@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { UserApi } from '../service/UserApi';
 
-const Notifications = ({ userId }: { userId: string }) => {
+const UserNotifications = ({ userId }: { userId: string }) => {
   const [notifications, setNotifications] = useState<
     { id: string; message: string; read: boolean }[]
   >([]);
@@ -27,9 +27,9 @@ const Notifications = ({ userId }: { userId: string }) => {
 
   const handleMarkAsRead = async (id: string) => {
     try {
-      await UserApi.MarkAsRead(userId);
+      await UserApi.MarkAsRead(id);
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+        prev.map((n) => (n.id === id ? { ...n, read: 1 } : n))
       );
     } catch (error) {
       console.error('Error updating notification:', error);
@@ -54,13 +54,12 @@ const Notifications = ({ userId }: { userId: string }) => {
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
-      <h2 className="text-xl font-semibold mb-4">Notifications</h2>
+    <div className="bg-white p-6 rounded-lg shadow-md max-w-full mx-auto">
       {notifications?.length === 0 ? (
         <p className="text-gray-500">No notifications available.</p>
       ) : (
         <ul className="space-y-4">
-          {notifications.map((notification) => (
+          {notifications.reverse().map((notification) => (
             <li
               key={notification.id}
               className={`p-4 border rounded-lg transition ${
@@ -84,4 +83,4 @@ const Notifications = ({ userId }: { userId: string }) => {
   );
 };
 
-export default Notifications;
+export default UserNotifications;

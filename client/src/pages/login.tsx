@@ -45,7 +45,8 @@ const Login = () => {
       await UserApi.getCsrfToken();
       const res = await UserApi.login({ email, password });
       localStorage.setItem('token', res.data.token);
-      dispatch(setUser(await UserApi.getUser()));
+      const {user}=await UserApi.getUser()
+      dispatch(setUser(user));
       if (res.data.user.isAdmin) {
         navigate('/dashboard');
       } else if (res.data.user.isActive) {

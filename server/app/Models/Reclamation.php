@@ -20,6 +20,7 @@ class Reclamation extends Model
         'etat', // Add this
         'email',
         'file_path',
+        'status'
     ];
 
     // Define constants for etat values

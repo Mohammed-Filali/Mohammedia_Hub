@@ -45,7 +45,7 @@ const ReclamationList = () => {
 
   useEffect(() => {
     // Filter reclamations with etat === 'finis'
-    const filteredFinis = reclamations.filter((r) => r.etat === 'finis');
+    const filteredFinis = reclamations.filter((r) => r.etat === 'finis'&& r.status === "accept");
     setReclamationsFinis(filteredFinis);
   }, [reclamations]);
 

@@ -20,10 +20,16 @@ class NotificationController extends Controller
     // Marquer une notification comme lue
     public function markAsRead($id)
     {
-        $notification = Notification::findOrFail($id);
-        $notification->update(['read' => true]);
+        try {
+            $notification = Notification::findOrFail($id);
+            $notification->update(['read' => 1]);
 
-        return response()->json(['message' => 'Notification marquée comme lue']);
+            return response()->json(['message' => 'Notification marquée comme lue']);
+        } catch (\Throwable $th) {
+            return response()->json(['message' => 'Notification pas marquée comme lue']);
+
+        }
+
     }
 
     // Créer une nouvelle notification

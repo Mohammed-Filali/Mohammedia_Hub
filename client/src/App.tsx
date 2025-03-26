@@ -5,12 +5,13 @@ import ReclamationForm from './pages/ReclamationForm';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ReclamationList from './pages/ReclamationList ';
-import DashboardLayout from './components/DashboardLayout';
-import UserList from './components/UserList';
-import Reclamations from './components/ReclamationList';
-import PollsStats from './components/PollsStats';
-import AdminDashboard from './components/AdminDashboard';
+import DashboardLayout from './Admin/DashboardLayout';
+import UserList from './Admin/UserList';
+import Reclamations from './Admin/ReclamationList';
+import PollsStats from './Admin/PollsStats';
+import AdminDashboard from './Admin/AdminDashboard';
 import Polls from './pages/Polls';
+import UserDashboard from './User/UserDashboard';
 
 const App = () => {
   return (
@@ -32,6 +33,8 @@ const App = () => {
               <Route path="/dashboard/PollsStats" element={<PollsStats />} />
               <Route index element={<AdminDashboard />} />
         </Route>
+        <Route path="/user/dashboard" element={<UserDashboard />} />
+
         
 
 

@@ -63,20 +63,20 @@ export default function Polls() {
                     </h3>
                     <div className="mb-4">
                       <div className="flex items-center justify-between mb-2">
-                        <p className="text-green-600 font-medium">
+                        <p className="text-[#606c38] font-medium">
                           Accept: {acceptPercentage}%
                         </p>
-                        <p className="text-red-600 font-medium">
+                        <p className="text-[#a78200] font-medium">
                           Refuse: {refusePercentage}%
                         </p>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-4">
                         <div
-                          className="bg-green-500 h-4 rounded-l-full"
+                          className="bg-[#606c38] h-4 rounded-l-full"
                           style={{ width: `${acceptPercentage}%` }}
                         ></div>
                         <div
-                          className="bg-red-500 h-4 rounded-r-full"
+                          className="bg-[#a78200] h-4 rounded-r-full"
                           style={{ width: `${refusePercentage}%` }}
                         ></div>
                       </div>
@@ -84,13 +84,13 @@ export default function Polls() {
                     <div className="flex space-x-4">
                       <button
                         onClick={() => handleVote(poll?.id, "accept")}
-                        className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-200"
+                        className="flex-1 bg-[#606c38] text-white px-4 py-2 rounded-lg hover:bg-[#606c38] transition duration-200"
                       >
                         Accept
                       </button>
                       <button
                         onClick={() => handleVote(poll?.id, "refuse")}
-                        className="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-200"
+                        className="flex-1 bg-[#a78200] text-white px-4 py-2 rounded-lg hover:bg-[#a78200] transition duration-200"
                       >
                         Refuse
                       </button>

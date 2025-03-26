@@ -29,6 +29,15 @@ class User extends Authenticatable
     ];
 
     /**
+     * Get the activities associated with the user.
+     */
+    public function activities()
+    {
+        return $this->hasMany(Activity::class);
+    }
+
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>

@@ -41,7 +41,15 @@ export const UserApi = {
         const {data}=await AxiosClient.put(`api/user/${id}`,{'isActive':values});
         return  data
     },
-    
+
+    ReclamationStatusUpdate: async (id ,status) => {
+        const {data}=await AxiosClient.put(`api/reclamation/status/${id}`,{'status':status});
+        return  data
+    },
+    DeleteReclamation: async (id) => {
+        const {data}=await AxiosClient.delete(`api/reclamation/${id}`);
+        return  data
+    },
     updateReclamationStatus: async (id,values) => {
         console.log(values);
         

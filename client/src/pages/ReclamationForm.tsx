@@ -28,7 +28,7 @@ export default function ReclamationForm() {
 
   const userSetter = async () => {
     const userData = await UserApi.getUser();
-    dispatch(setUser(userData));
+    dispatch(setUser(userData.user));
   };
 
   useEffect(() => {
@@ -186,18 +186,34 @@ export default function ReclamationForm() {
             {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
           </div>
 
-          <div>
+            <div>
             <label className="block text-sm font-medium">Télécharger une photo</label>
-            <input
+            <div className="flex items-center space-x-3">
+              <input
               type="file"
               onChange={(e) => {
                 setFile(e.target.files?.[0] || null);
                 setFileError(null);
               }}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-green"
-            />
+              />
+              <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-custom-green"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 16l4-4m0 0l4 4m-4-4v12m13-12h-4m4 0l-4-4m4 4l-4 4"
+              />
+              </svg>
+            </div>
             {fileError && <p className="text-red-500 text-xs mt-1">{fileError}</p>}
-          </div>
+            </div>
 
           <button
             type="submit"

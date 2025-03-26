@@ -22,7 +22,10 @@ use App\Http\Controllers\PollController;
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    $user = $request->user();
+    $reclamations = \App\Models\Reclamation::where('email', $user->email)->get();
+    $activities = \App\Models\Activity::where('user_id', $user->id)->get();
+    return response()->json(['reclamations' => $reclamations, 'user' => $user, 'activities' => $activities]);
 });
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/register', [AuthController::class, 'register'])->name('register');
@@ -31,6 +34,9 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 Route::middleware('auth:sanctum')->group(function () {
 
+
+    Route::put('/reclamation/status/{id}', [ReclamationController::class, 'updateStatus'])->name('updateReclamationState');
+
     Route::get('/users', [AuthController::class, 'users'])->name('users');
     Route::put('/user/{id}', [AuthController::class, 'updateUserStatus'])->name('updateUserStatus');
     Route::apiResource('polls', PollController::class);
@@ -38,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/reclamation/{id}', [ReclamationController::class, 'updateReclamationState'])->name('updateReclamationState');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/votes', [PollController::class, 'lastVotes']);
+    Route::delete('/reclamation/{id}', [ReclamationController::class, 'destroy'])->name('deleteReclamation');
 
 });
 

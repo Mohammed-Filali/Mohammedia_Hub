@@ -15,7 +15,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const userSetter = async () => {
     try {
       const userData = await UserApi.getUser();
-      dispatch(setUser(userData));
+      dispatch(setUser(userData.user));
     } catch (error) {
       console.error('Failed to fetch user:', error);
     }
@@ -50,14 +50,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <LogOut className="mr-2" /> Logout
             </button>
           </li>
-          <li>
+          <Link to="/user/dashboard">
             <span
-              className="text-custom-yellow bg-custom-green rounded-full w-10 h-10 flex items-center justify-center text-xl font-semibold shadow-md"
+              className="text-white bg-custom-green rounded-full w-10 h-10 flex items-center justify-center text-xl font-semibold shadow-md"
               aria-label="User Profile"
             >
               {user.name ? user.name[0] : <User />}
             </span>
-          </li>
+          </Link>
         </>
       );
     }

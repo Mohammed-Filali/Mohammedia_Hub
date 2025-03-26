@@ -54,6 +54,8 @@ export default function AdminDashboard() {
           totalReclamations: reclamations.data.length,
           totalPolls: pollsData.length,
           acceptedReclamations: reclamations.data.filter((u) => u.etat === 'encours').length,
+          nonTreteReclamations: reclamations.data.filter((u) => u.status === '').length,
+          FinisReclamations: reclamations.data.filter((u) => u.etat === 'finis').length,
           rejectedReclamations: reclamations.data.filter((u) => u.etat === 'pas encours').length,
           activeUsers: users.data.filter((u) => u.isActive === 1).length,
           inactiveUsers: users.data.filter((u) => u.isActive === 0).length,
@@ -91,8 +93,11 @@ export default function AdminDashboard() {
 
   const barData = [
     { name: 'Réclamations', value: stats.totalReclamations },
+    { name: 'Non Traitées', value: stats.nonTreteReclamations },
     { name: 'encours', value: stats.acceptedReclamations },
     { name: 'pas_encours', value: stats.rejectedReclamations },
+    { name: 'finis', value: stats.FinisReclamations },
+
   ];
 
   const pieData = [

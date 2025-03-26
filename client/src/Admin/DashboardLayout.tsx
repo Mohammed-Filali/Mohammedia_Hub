@@ -13,7 +13,7 @@ const DashboardLayout = () => {
   const user = useSelector((state: RootState) => state.user);
  const userSetter = async () => {
     const userData = await UserApi.getUser();
-    dispatch(setUser(userData));
+    dispatch(setUser(userData.user));
   };
   useEffect(()=>{
     if(!user){

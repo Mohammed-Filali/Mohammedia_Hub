@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
+use App\Mail\ReclamationMailer;
 use App\Models\Notification;
 use App\Models\Reclamation;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use PhpParser\Node\Expr\AssignOp\Concat;
+use PhpParser\Node\Expr\BinaryOp\Concat as BinaryOpConcat;
 
 class ReclamationController extends Controller
 {
-
-
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -30,10 +33,12 @@ class ReclamationController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
+
         $user = User::where('email', $request->input('email'))->first();
-if ($user &&!$user->isActive) {
-    return response()->json(['message' => 'Le email de ce compte est déjà désactivé'], 400);
-}
+        if ($user && !$user->isActive) {
+            return response()->json(['message' => 'L\'email de ce compte est déjà désactivé'], 400);
+        }
+
         $filePath = null;
         if ($request->hasFile('file')) {
             $filePath = $request->file('file')->store('reclamations', 'public');
@@ -53,8 +58,17 @@ if ($user &&!$user->isActive) {
 
         Notification::create([
             'user_id' => 1,
-            'message' => 'ggggggggggg',
+            'message' => 'Nouvelle réclamation soumise.',
         ]);
+
+        if ($user) {
+            $user->activities()->create([
+                'user_id' => $user->id,
+                'action' => 'Ajout de réclamation',
+                'description' => 'Vous avez ajouté une nouvelle réclamation avec la catégorie ' . $request->input('category') ,
+            ]);
+
+        }
 
         return response()->json(['message' => 'Réclamation soumise avec succès', 'reclamation' => $reclamation], 201);
     }
@@ -70,15 +84,47 @@ if ($user &&!$user->isActive) {
         ]);
     }
 
-    public function updateReclamationState(Request $request , $id){
+    public function updateReclamationState(Request $request, $id)
+    {
         $request->validate([
             'etat' => 'required|in:pas encours,encours,finis',
         ]);
-        $reclamation=Reclamation::find($id);
-        $reclamation->update(['etat' => $request->etat]);
 
-        return response()->json(['message' => 'État mis à jour avec succès.']);
+        $reclamation = Reclamation::find($id);
+        $reclamation->update(['etat' => $request->input('etat')]);
 
+
+        $user = User::where('email', $reclamation->email)->first();
+        if ($user ) {
+            Notification::create([
+                'user_id' => $user->id,
+                'message' => 'Votre réclamation a été mise à jour.',
+            ]);        }
+
+        return response()->json(['message' => 'État de la réclamation mis à jour avec succès.']);
+    }
+
+
+
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:accept,refuse,', // Valider les valeurs possibles
+        ]);
+
+        $reclamation = Reclamation::findOrFail($id);
+        $reclamation->status = $request->status;
+        $reclamation->save();
+
+        return response()->json(['message' => 'Statut mis à jour avec succès.']);
+    }
+
+    public function destroy($id)
+    {
+        $reclamation = Reclamation::find($id);
+        $reclamation->delete();
+
+        return response()->json(['message' => 'Réclamation supprimée avec succès.']);
     }
 
 }
