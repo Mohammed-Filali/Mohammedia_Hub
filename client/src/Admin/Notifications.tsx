@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { UserApi } from '../service/UserApi';
 
-const Notifications = ({ userId }: { userId: string }) => {
+const Notifications: React.FC<{ userId: string  }> = ({ userId ,setNoticesCount}) => {
   const [notifications, setNotifications] = useState<
     { id: string; message: string; read: boolean }[]
   >([]);
@@ -13,7 +13,7 @@ const Notifications = ({ userId }: { userId: string }) => {
       try {
         setError(null); // Reset error state
         const response = await UserApi.getNotifications(userId);
-        setNotifications(response);
+        setNotifications(response.filter((n) => !n.read ));
       } catch (error) {
         console.error('Error fetching notifications:', error);
         setError('Failed to load notifications. Please try again later.');
@@ -29,8 +29,9 @@ const Notifications = ({ userId }: { userId: string }) => {
     try {
       await UserApi.MarkAsRead(id);
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: 1 } : n))
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
+      setNoticesCount((prev)=> prev-1)
     } catch (error) {
       console.error('Error updating notification:', error);
       setError('Failed to mark notification as read. Please try again.');

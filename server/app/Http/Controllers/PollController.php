@@ -45,6 +45,14 @@ class PollController extends Controller
             'vote' => $request->vote,
         ]);
 
+        if ($user) {
+            $user->activities()->create([
+            'user_id' => $user->id,
+            'action' => 'Vote enregistré',
+            'description' => 'Vous avez voté "' . $request->vote . '" pour le sondage avec la question: "' . $poll->question . '"',
+            ]);
+        }
+
         return response()->json(['message' => 'Vote recorded successfully.']);
     }
 

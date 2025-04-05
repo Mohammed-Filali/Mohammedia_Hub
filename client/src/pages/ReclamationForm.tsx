@@ -7,6 +7,7 @@ import Layout from '../layouts/layout';
 import { UserApi } from '../service/UserApi';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, setUser } from '../redux/store';
+import { toast } from 'react-toastify';
 
 const reclamationSchema = z.object({
   description: z.string().min(10, 'La description est obligatoire et doit comporter au moins 10 caractères'),
@@ -87,7 +88,7 @@ export default function ReclamationForm() {
       if (file) formData.append('file', file);
 
       const response = await UserApi.createReclamation(formData);
-      alert('Réclamation soumise avec succès !');
+      toast.success('Réclamation soumise avec succès !');
       reset();
       setFile(null);
       setFileError(null);

@@ -8,6 +8,8 @@ import Activities from "./Activities";
 import Layout from "../layouts/layout";
 import UserNotifications from "./UserNotifications";
 import UserReclamations from "./UserReclamationList";
+import { div } from "framer-motion/client";
+import { Bell } from "lucide-react";
 
 enum Section {
     Dashboard,
@@ -54,6 +56,7 @@ const UserDashboard: React.FC = () => {
     const dispatch = useDispatch();
     const token = localStorage.getItem("token");
     const [activeSection, setActiveSection] = useState<Section>(Section.Dashboard);
+    const [noticesCount, setNoticesCount] = useState(0);
 
     const fetchUser = async () => {
         try {
@@ -65,11 +68,35 @@ const UserDashboard: React.FC = () => {
     };
 
     useEffect(() => {
-        if (token !== "false" && !user) {
+
+        const fetchUserNotices = async () => {
+            try {
+              const userData = await UserApi.getUser();
+              setNoticesCount(userData.noticesCount)
+        
+            } catch (error) {
+              console.error("Failed to fetch user:", error);
+            }
+          }
+        
+           fetchUserNotices() 
+        if (token === "false" && !user) {
             fetchUser();
         }
     }, [user, token, dispatch]);
 
+    const Icon = ({NotificationsCount})=>{
+        return<>
+            <div className="relative">
+                <Bell className="w-6 h-6" />
+                {NotificationsCount > 0 && (
+                    <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">
+                        {NotificationsCount}
+                    </span>
+                )}
+            </div>
+        </>}
+      
     return (
         <Layout>
             <div className="dashboard-container p-6 bg-gray-100 min-h-screen">
@@ -81,9 +108,10 @@ const UserDashboard: React.FC = () => {
 
                     {/* Dashboard Sections */}
                     <div className="w-full flex flex-wrap">
+
                         <DashboardSection
                             title="Notifications"
-                            icon={<FaBell />}
+                            icon={ <Icon  NotificationsCount={noticesCount} />}
                             isActive={activeSection === Section.Settings}
                             onClick={() =>
                                 setActiveSection(
@@ -94,7 +122,7 @@ const UserDashboard: React.FC = () => {
                             }
                             activeColor="text-green-500"
                         >
-                            <UserNotifications userId={user?.id} />
+                            <UserNotifications setNoticesCount={setNoticesCount}  userId={user?.id} />
                         </DashboardSection>
 
                         <DashboardSection

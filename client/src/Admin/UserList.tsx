@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { UserApi } from '../service/UserApi';
+import { toast } from 'react-toastify';
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
@@ -20,6 +21,7 @@ const UserList = () => {
         user.id === id ? { ...user, isActive: !isActive } : user
       )
     );
+    toast.success('Statut de l\'utilisateur mis à jour avec succès !');
   };
 
   const filteredUsers = users.filter((user) =>

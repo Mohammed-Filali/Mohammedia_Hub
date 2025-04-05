@@ -3,16 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Mail\ReclamationMailer;
 use App\Models\Notification;
 use App\Models\Reclamation;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
+
 use Illuminate\Support\Facades\Validator;
-use PhpParser\Node\Expr\AssignOp\Concat;
-use PhpParser\Node\Expr\BinaryOp\Concat as BinaryOpConcat;
+
 
 class ReclamationController extends Controller
 {
@@ -58,7 +55,11 @@ class ReclamationController extends Controller
 
         Notification::create([
             'user_id' => 1,
-            'message' => 'Nouvelle réclamation soumise.',
+            'message' => sprintf(
+                'Nouvelle réclamation soumise par : %s (Email : %s)',
+                $request->input('name'),
+                $request->input('email')
+            ),
         ]);
 
         if ($user) {
@@ -116,6 +117,13 @@ class ReclamationController extends Controller
         $reclamation->status = $request->status;
         $reclamation->save();
 
+        $user = User::where('email', $reclamation->email)->first();
+        if ($user ) {
+            Notification::create([
+                'user_id' => $user->id,
+                'message' => 'Votre réclamation a été accepté par admine',
+            ]);        }
+
         return response()->json(['message' => 'Statut mis à jour avec succès.']);
     }
 
@@ -123,6 +131,12 @@ class ReclamationController extends Controller
     {
         $reclamation = Reclamation::find($id);
         $reclamation->delete();
+        $user = User::where('email', $reclamation->email)->first();
+        if ($user ) {
+            Notification::create([
+                'user_id' => $user->id,
+                'message' => 'Votre réclamation a été refusé par admin',
+            ]);        }
 
         return response()->json(['message' => 'Réclamation supprimée avec succès.']);
     }

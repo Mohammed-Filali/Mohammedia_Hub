@@ -4,6 +4,7 @@ import { UserApi } from '../service/UserApi';
 import { Loader2 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import bg from '../images/logo-com.png';
+import { toast } from 'react-toastify';
 
 const Register = () => {
   const [email, setEmail] = useState('');
@@ -78,9 +79,11 @@ const Register = () => {
     try {
       await UserApi.createUser({ name, adress, CIN, age, password, email, telephone });
       navigate('/login');
+      toast.success('Inscription réussie !');
     } catch (error) {
       console.error('Erreur lors de l\'inscription', error.response?.data?.message || 'Une erreur est survenue');
       setErrors({ faild: error.response?.data?.message || 'Une erreur est survenue' });
+      toast.error('Erreur lors de l\'inscription');
     } finally {
       setLoading(false);
     }

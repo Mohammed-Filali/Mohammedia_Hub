@@ -87,7 +87,25 @@ export const UserApi = {
     getVotes:async () => {
         const {data}=await AxiosClient.get('api/votes')
         return  data
-    }
+    },
+    getNews:async () => {
+        const {data}=await AxiosClient.get('api/news')
+        return  data
+    },
+
+    addNew:async (values) => {
+        const {data}=await AxiosClient.post('api/news',values)
+        return  data
+    },
+    updateNews:async (id,values) => {
+        const {data}=await AxiosClient.post(`api/news/${id}`,values)
+        return  data},
+
+    deleteNews:async (id) => {
+        const {data}=await AxiosClient.delete(`api/news/${id}`)
+        return  data
+    },
+
 }
 
 

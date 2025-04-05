@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { RootState, setUser } from '../redux/store';
 import { UserApi } from '../service/UserApi';
 import bg from '../images/logo-com.png';
@@ -11,7 +11,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
   const dispatch = useDispatch();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const navigate = useNavigate();
   const userSetter = async () => {
     try {
       const userData = await UserApi.getUser();
@@ -31,7 +31,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     try {
       await UserApi.logout();
       localStorage.setItem('token', 'false');
+
       dispatch(setUser({}));
+      navigate("/");
     } catch (error) {
       console.error('Logout failed:', error);
     }

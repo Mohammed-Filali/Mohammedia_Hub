@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { UserApi } from "../service/UserApi";
 import Layout from "../layouts/layout";
+import { toast } from "react-toastify";
 
 export default function Polls() {
   const [polls, setPolls] = useState([]);
@@ -20,11 +21,11 @@ export default function Polls() {
           .catch((error) =>
             console.error("Error fetching polls:", error.response.data)
           );
+          toast.success("Vote added successfully!");
       })
       .catch((error) => {
         console.error("Error voting:", error.response.data);
-        alert(error.response.data.message);
-      });
+        toast.error("Error adding vote!");    });
   };
 
   const calculatePercentage = (count, total) => {

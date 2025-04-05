@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { UserApi } from "../service/UserApi";
+import { toast } from "react-toastify";
 
 const PollsStats = () => {
   const [newPoll, setNewPoll] = useState("");
@@ -19,6 +20,7 @@ const PollsStats = () => {
         const response = await UserApi.AddPull(newPoll);
         setPolls([...polls, response]);
         setNewPoll("");
+        toast.success("Poll added successfully!");
       } catch (error) {
         console.error("Error adding poll:", error);
       }

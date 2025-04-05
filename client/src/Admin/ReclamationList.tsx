@@ -32,6 +32,7 @@ const Reclamations = () => {
       try {
         const { data } = await UserApi.getReclamations();
         setReclamations(data.filter((r) => r.status === ""));
+        toast.success("Réclamations chargées avec succès.");
       } catch (error) {
         toast.error("Erreur lors du chargement des réclamations.");
       }
@@ -156,7 +157,12 @@ const Reclamations = () => {
       </div>
       <h2 className="text-xl font-semibold mb-4">Liste des Réclamations</h2>
 
-      <input
+      
+
+      {filters.selectedStatus === "accept" ? (
+        <ReclamationEtat />
+      ) : (<div className="w-full">
+        <input
         type="text"
         placeholder="Rechercher par email"
         value={filters.searchEmail}
@@ -181,16 +187,16 @@ const Reclamations = () => {
         ))}
       </select>
 
-      {filters.selectedStatus === "accept" ? (
-        <ReclamationEtat />
-      ) : (
-        <div className="space-y-4">
+      <div className="space-y-4">
           {filteredReclamations.length === 0 ? (
             <p>Aucune réclamation trouvée.</p>
           ) : (
             filteredReclamations.map(renderReclamation)
           )}
         </div>
+      </div>
+        
+        
       )}
     </div>
   );

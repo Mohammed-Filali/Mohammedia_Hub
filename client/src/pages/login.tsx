@@ -5,11 +5,16 @@ import { UserApi } from '../service/UserApi';
 import { setUser } from '../redux/store';
 import { useDispatch } from 'react-redux';
 import bg from '../images/logo-com.png';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Loader2 } from 'lucide-react';
+;
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -40,28 +45,35 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
+
+    setLoading(true);
     const newErrors: { [key: string]: string } = {};
     try {
       await UserApi.getCsrfToken();
       const res = await UserApi.login({ email, password });
       localStorage.setItem('token', res.data.token);
-      const {user}=await UserApi.getUser()
+      const { user } = await UserApi.getUser();
       dispatch(setUser(user));
+      toast.success('Connexion réussie !');
       if (res.data.user.isAdmin) {
         navigate('/dashboard');
       } else if (res.data.user.isActive) {
         navigate('/');
       } else if (!res.data.user.isActive) {
-        alert('Ce compte est désactivé');
+        toast.error('Ce compte est désactivé');
       }
     } catch (error) {
       newErrors.faild = error.response?.data?.message || 'Une erreur est survenue';
       setErrors(newErrors);
+      toast.error(newErrors.faild);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      {loading && <Loader2 />}
       <form
         onSubmit={handleLogin}
         className="w-full max-w-md bg-white text-center p-6 rounded-lg shadow-md"
@@ -118,8 +130,9 @@ const Login = () => {
         <button
           type="submit"
           className="w-full bg-custom-green text-white px-6 py-3 rounded-lg mt-4 hover:bg-green-700 transition duration-300"
+          disabled={loading}
         >
-          Se connecter
+            {loading ? <Loader2 className="animate-spin mx-auto" /> : 'Se connecter'}
         </button>
       </form>
     </div>
